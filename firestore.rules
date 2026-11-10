@@ -1,0 +1,38 @@
+rules_version = '2';
+
+// حط هاي القواعد بـ Firebase Console: Firestore Database > Rules > الصق واضغط Publish.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /codes/{code} {
+      // التطبيق وأداة الإدارة لازم يقرأوا الكود عشان يتحققوا منه
+      allow read: if true;
+
+      // إنشاء أكواد جديدة: فقط من أداة الإدارة بعد تسجيل الدخول (request.auth != null)
+      allow create: if request.auth != null
+                    && request.resource.data.keys().hasAll(['days', 'used'])
+                    && request.resource.data.used == false
+                    && request.resource.data.days is int
+                    && request.resource.data.days > 0;
+
+      // ثلاث حالات للتعديل:
+      // 1) التطبيق يفعّل كود غير مستخدم (used: false -> true) بدون تسجيل دخول
+      // 2) التطبيق يبلّغ عن طلب مقبول (بس زيادة عداد acceptedCount بمقدار 1 + وقت/تفاصيل آخر طلب)
+      // 3) أداة الإدارة (بعد تسجيل الدخول) تقدر تعدّل أي شي: إلغاء، تمديد، الخ
+      allow update: if (resource.data.used == false
+                        && request.resource.data.used == true
+                        && request.resource.data.deviceId is string
+                        && request.resource.data.expiresAt is int)
+                    || (resource.data.used == true
+                        && request.resource.data.diff(resource.data).affectedKeys()
+                             .hasOnly(['acceptedCount', 'lastAcceptedAt', 'lastAcceptedInfo'])
+                        && request.resource.data.acceptedCount
+                             == (resource.data.acceptedCount is int
+                                 ? resource.data.acceptedCount : 0) + 1)
+                    || request.auth != null;
+
+      // الحذف فقط من أداة الإدارة بعد تسجيل الدخول
+      allow delete: if request.auth != null;
+    }
+  }
+}

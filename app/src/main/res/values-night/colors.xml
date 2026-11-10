@@ -1,0 +1,13 @@
+<resources>
+    <color name="primary">#B07CFF</color>
+    <color name="primary_dark">#07030F</color>
+    <color name="on_primary">#12062B</color>
+    <color name="accent">#C084FC</color>
+    <color name="bg">#0B0614</color>
+    <color name="surface">#150D26</color>
+    <color name="text">#F0E9FF</color>
+    <color name="muted">#A596C4</color>
+    <color name="stroke">#2A1D47</color>
+    <color name="ok">#2FBF8F</color>
+    <color name="warn">#FF7A6B</color>
+</resources>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "286220209548",
+    "project_id": "sayad-85c31",
+    "storage_bucket": "sayad-85c31.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:286220209548:android:89bd64feb0ed09ef7e5aa9",
+        "android_client_info": {
+          "package_name": "com.sayad.orders.pro"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8fy8uDhoIrBZ2P3EeR1vl4bnAU3idaLc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

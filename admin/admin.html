@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>لوحة تحكم Sniper Orders Pro</title>
+<style>
+  :root {
+    --bg: #0a0614; --surface: #130c22; --surface-2: #1b1230; --primary: #a855f7;
+    --primary-dark: #6d28d9; --accent: #c084fc; --text: #f3edff; --muted: #9c8fb8;
+    --stroke: #2c1f4a; --ok: #2fbf8f; --warn: #ff7a6b; --info: #60a5fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: radial-gradient(circle at top, #1b1230 0%, #0a0614 60%);
+    color: var(--text); font-family: Tahoma, "Segoe UI", Arial, sans-serif;
+    margin: 0; min-height: 100vh;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 22px 16px 60px; }
+
+  /* ---------- تسجيل الدخول ---------- */
+  #loginScreen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  }
+  .login-card {
+    width: 100%; max-width: 360px; background: var(--surface); border: 1px solid var(--stroke);
+    border-radius: 20px; padding: 28px 24px; text-align: center;
+  }
+  .login-card .brand { font-size: 40px; margin-bottom: 4px; }
+  .login-card h1 { font-size: 19px; margin: 6px 0 2px; color: var(--primary); }
+  .login-card p { color: var(--muted); font-size: 13px; margin: 0 0 18px; }
+
+  input {
+    width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--stroke);
+    background: var(--surface-2); color: var(--text); font-size: 15px; margin-bottom: 10px;
+    text-align: right;
+  }
+  input:focus { outline: 2px solid var(--primary); }
+
+  button {
+    cursor: pointer; border: none; border-radius: 12px; font-size: 15px; font-weight: bold;
+    padding: 12px 16px; transition: opacity .15s;
+  }
+  button:active { opacity: .75; }
+  .btn-primary { width: 100%; background: linear-gradient(135deg, var(--primary-dark), var(--primary)); color: #fff; }
+  .btn-ghost { background: transparent; border: 1px solid var(--stroke); color: var(--text); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 9px; }
+  .btn-danger { background: #5c1a1a; color: #ffd4cf; }
+  .btn-ok { background: #0f3d30; color: #9ff0d4; }
+
+  .err { color: var(--warn); font-size: 13px; margin-top: 8px; min-height: 16px; }
+
+  /* ---------- اللوحة ---------- */
+  #appScreen { display: none; }
+
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .topbar .brand-row { display: flex; align-items: center; gap: 10px; }
+  .topbar .brand-row .emoji { font-size: 26px; }
+  .topbar h1 { font-size: 18px; margin: 0; color: var(--primary); }
+  .topbar .sub { font-size: 12px; color: var(--muted); }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-bottom: 18px; }
+  .stat {
+    background: var(--surface); border: 1px solid var(--stroke); border-radius: 14px;
+    padding: 12px 14px; text-align: center;
+  }
+  .stat .num { font-size: 22px; font-weight: bold; }
+  .stat .label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .stat.ok .num { color: var(--ok); }
+  .stat.warn .num { color: var(--warn); }
+  .stat.info .num { color: var(--info); }
+
+  .card { background: var(--surface); border: 1px solid var(--stroke); border-radius: 18px; padding: 18px; margin-bottom: 16px; }
+  .card h2 { font-size: 15px; margin: 0 0 12px; color: var(--accent); }
+
+  .gen-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .gen-row > div { flex: 1; min-width: 110px; }
+  .gen-row label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+
+  textarea {
+    width: 100%; min-height: 90px; margin-top: 12px; background: var(--surface-2); color: var(--text);
+    border: 1px solid var(--stroke); border-radius: 12px; padding: 10px; font-family: monospace;
+    direction: ltr; text-align: left; font-size: 13px;
+  }
+
+  .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+  .toolbar input[type=text] { flex: 1; min-width: 140px; margin-bottom: 0; }
+  .filter-chip {
+    border: 1px solid var(--stroke); border-radius: 999px; padding: 6px 14px; font-size: 12px;
+    background: transparent; color: var(--muted); cursor: pointer;
+  }
+  .filter-chip.active { background: var(--primary-dark); color: #fff; border-color: var(--primary-dark); }
+
+  .code-list { display: flex; flex-direction: column; gap: 10px; }
+  .code-row {
+    background: var(--surface-2); border: 1px solid var(--stroke); border-radius: 14px;
+    padding: 12px 14px;
+  }
+  .code-row .top-line { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .code-row .code-text {
+    font-family: monospace; direction: ltr; font-size: 15px; font-weight: bold; letter-spacing: .5px;
+  }
+  .badge { font-size: 11px; padding: 3px 9px; border-radius: 999px; font-weight: bold; }
+  .badge.ok { background: #0f3d30; color: var(--ok); }
+  .badge.warn { background: #4a1f1f; color: var(--warn); }
+  .badge.muted { background: #2a2240; color: var(--muted); }
+  .code-row .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 6px 14px; margin-top: 10px; font-size: 12.5px; color: var(--muted); }
+  .code-row .meta b { color: var(--text); font-weight: normal; }
+  .code-row .actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+
+  .empty { text-align: center; color: var(--muted); padding: 30px 10px; font-size: 13px; }
+  .loading { text-align: center; color: var(--muted); padding: 20px; font-size: 13px; }
+
+  .logout-link { color: var(--muted); font-size: 12px; text-decoration: underline; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="brand">🎯</div>
+    <h1>Sniper Orders Pro</h1>
+    <p>لوحة تحكم الإدارة</p>
+    <input id="loginEmail" type="email" placeholder="البريد الإلكتروني" autocomplete="username" />
+    <input id="loginPass" type="password" placeholder="كلمة المرور" autocomplete="current-password" />
+    <button class="btn-primary" onclick="doLogin()">دخول</button>
+    <div class="err" id="loginErr"></div>
+  </div>
+</div>
+
+<div id="appScreen">
+  <div class="wrap">
+
+    <div class="topbar">
+      <div class="brand-row">
+        <span class="emoji">🎯</span>
+        <div>
+          <h1>لوحة التحكم</h1>
+          <div class="sub">Sniper Orders Pro</div>
+        </div>
+      </div>
+      <span class="logout-link" onclick="doLogout()">تسجيل خروج</span>
+    </div>
+
+    <div class="stats" id="statsRow"></div>
+
+    <div class="card">
+      <h2>➕ توليد أكواد جديدة</h2>
+      <div class="gen-row">
+        <div>
+          <label>الكمية</label>
+          <input id="genQty" type="number" value="10" min="1" max="200" />
+        </div>
+        <div>
+          <label>مدة الاشتراك (أيام)</label>
+          <input id="genDays" type="number" value="30" min="1" />
+        </div>
+      </div>
+      <button class="btn-primary" style="margin-top:10px;" onclick="generateCodes()">توليد الأكواد</button>
+      <div class="err" id="genMsg" style="color: var(--ok);"></div>
+      <textarea id="genOut" placeholder="الأكواد المولّدة بتظهر هون جاهزة للنسخ..." readonly></textarea>
+    </div>
+
+    <div class="card">
+      <h2>📋 كل الأكواد</h2>
+      <div class="toolbar">
+        <input id="searchBox" type="text" placeholder="دوّر بكود أو اسم جهاز..." oninput="renderList()" />
+        <button class="btn-ghost btn-sm" onclick="loadCodes()">تحديث 🔄</button>
+      </div>
+      <div class="toolbar">
+        <button class="filter-chip active" data-f="all" onclick="setFilter('all')">الكل</button>
+        <button class="filter-chip" data-f="active" onclick="setFilter('active')">فعّال</button>
+        <button class="filter-chip" data-f="unused" onclick="setFilter('unused')">غير مستخدم</button>
+        <button class="filter-chip" data-f="expired" onclick="setFilter('expired')">منتهي</button>
+        <button class="filter-chip" data-f="revoked" onclick="setFilter('revoked')">ملغي</button>
+      </div>
+      <div id="listBox"><div class="loading">سجّل دخول عشان تشوف الأكواد...</div></div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+  import {
+    getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+  import {
+    getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, getDocs, query, orderBy, limit
+  } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC8fy8uDhoIrBZ2P3EeR1vl4bnAU3idaLc",
+    authDomain: "sayad-85c31.firebaseapp.com",
+    projectId: "sayad-85c31",
+    storageBucket: "sayad-85c31.firebasestorage.app",
+    messagingSenderId: "286220209548",
+    appId: "1:286220209548:android:89bd64feb0ed09ef7e5aa9"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let allCodes = [];      // [{id, ...data}]
+  let activeFilter = "all";
+
+  // ---------------- تسجيل الدخول ----------------
+
+  window.doLogin = async function () {
+    const email = document.getElementById("loginEmail").value.trim();
+    const pass = document.getElementById("loginPass").value;
+    const err = document.getElementById("loginErr");
+    err.textContent = "";
+    if (!email || !pass) { err.textContent = "عبّي البريد وكلمة المرور"; return; }
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+    } catch (e) {
+      err.textContent = "فشل الدخول: " + (e.message || e.code);
+    }
+  };
+
+  window.doLogout = async function () {
+    await signOut(auth);
+  };
+
+  onAuthStateChanged(auth, (user) => {
+    document.getElementById("loginScreen").style.display = user ? "none" : "flex";
+    document.getElementById("appScreen").style.display = user ? "block" : "none";
+    if (user) loadCodes();
+  });
+
+  // ---------------- توليد أكواد ----------------
+
+  function randomCode() {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // بدون أحرف/أرقام ملتبسة
+    let s = "";
+    for (let i = 0; i < 8; i++) s += chars[Math.floor(Math.random() * chars.length)];
+    return "SNP-" + s;
+  }
+
+  window.generateCodes = async function () {
+    const qty = Math.max(1, Math.min(200, parseInt(document.getElementById("genQty").value || "1", 10)));
+    const days = Math.max(1, parseInt(document.getElementById("genDays").value || "30", 10));
+    const out = document.getElementById("genOut");
+    const msg = document.getElementById("genMsg");
+    out.value = "";
+    msg.style.color = "var(--muted)";
+    msg.textContent = "جاري التوليد...";
+
+    const codes = [];
+    for (let i = 0; i < qty; i++) {
+      let code, tries = 0;
+      do { code = randomCode(); tries++; } while (codes.includes(code) && tries < 20);
+      codes.push(code);
+    }
+
+    try {
+      for (const code of codes) {
+        await setDoc(doc(db, "codes", code), {
+          days: days,
+          used: false,
+          deviceId: null,
+          deviceName: null,
+          activatedAt: null,
+          expiresAt: null,
+          revoked: false,
+          acceptedCount: 0,
+          createdAt: Date.now()
+        });
+      }
+      out.value = codes.join("\n");
+      msg.style.color = "var(--ok)";
+      msg.textContent = `تم توليد ${codes.length} كود، كل وحدة ${days} يوم ✅`;
+      loadCodes();
+    } catch (e) {
+      msg.style.color = "var(--warn)";
+      msg.textContent = "خطأ: " + (e.message || e.code);
+    }
+  };
+
+  // ---------------- تحميل وعرض الأكواد ----------------
+
+  window.loadCodes = async function () {
+    const box = document.getElementById("listBox");
+    box.innerHTML = `<div class="loading">جاري التحميل...</div>`;
+    try {
+      const q = query(collection(db, "codes"), orderBy("createdAt", "desc"), limit(400));
+      const snap = await getDocs(q);
+      allCodes = [];
+      snap.forEach((d) => allCodes.push({ id: d.id, ...d.data() }));
+      renderStats();
+      renderList();
+    } catch (e) {
+      box.innerHTML = `<div class="loading" style="color: var(--warn);">خطأ: ${e.message || e.code}</div>`;
+    }
+  };
+
+  function statusOf(v) {
+    if (v.revoked) return "revoked";
+    if (!v.used) return "unused";
+    const remain = (v.expiresAt || 0) - Date.now();
+    return remain > 0 ? "active" : "expired";
+  }
+
+  function renderStats() {
+    const counts = { all: allCodes.length, active: 0, unused: 0, expired: 0, revoked: 0 };
+    for (const v of allCodes) counts[statusOf(v)]++;
+    const row = document.getElementById("statsRow");
+    row.innerHTML = `
+      <div class="stat info"><div class="num">${counts.all}</div><div class="label">كل الأكواد</div></div>
+      <div class="stat ok"><div class="num">${counts.active}</div><div class="label">فعّالة الآن</div></div>
+      <div class="stat"><div class="num">${counts.unused}</div><div class="label">غير مستخدمة</div></div>
+      <div class="stat warn"><div class="num">${counts.expired + counts.revoked}</div><div class="label">منتهية/ملغاة</div></div>
+    `;
+  }
+
+  window.setFilter = function (f) {
+    activeFilter = f;
+    document.querySelectorAll(".filter-chip").forEach((el) => {
+      el.classList.toggle("active", el.dataset.f === f);
+    });
+    renderList();
+  };
+
+  window.renderList = function () {
+    const box = document.getElementById("listBox");
+    const term = (document.getElementById("searchBox")?.value || "").trim().toLowerCase();
+
+    let rows = allCodes.filter((v) => {
+      if (activeFilter !== "all" && statusOf(v) !== activeFilter) return false;
+      if (!term) return true;
+      return v.id.toLowerCase().includes(term) ||
+             (v.deviceName || "").toLowerCase().includes(term);
+    });
+
+    if (rows.length === 0) {
+      box.innerHTML = `<div class="empty">ما في نتائج مطابقة</div>`;
+      return;
+    }
+
+    box.innerHTML = rows.map((v) => {
+      const st = statusOf(v);
+      const badgeMap = {
+        active: `<span class="badge ok">فعّال</span>`,
+        unused: `<span class="badge muted">غير مستخدم</span>`,
+        expired: `<span class="badge warn">منتهي</span>`,
+        revoked: `<span class="badge warn">ملغي</span>`
+      };
+      const remainTxt = (() => {
+        if (st !== "active") return "—";
+        const remain = v.expiresAt - Date.now();
+        const d = Math.floor(remain / 86400000);
+        const h = Math.floor((remain % 86400000) / 3600000);
+        return `${d}ي ${h}س`;
+      })();
+      const device = v.deviceName || (v.deviceId ? "جهاز غير مسمّى" : "—");
+      const orders = v.acceptedCount
+        ? `${v.acceptedCount} طلب${v.lastAcceptedInfo ? ` — ${v.lastAcceptedInfo}` : ""}`
+        : "—";
+      const actionBtn = (v.used && !v.revoked)
+        ? `<button class="btn-danger btn-sm" onclick="revokeCode('${v.id}')">إلغاء الاشتراك</button>`
+        : `<button class="btn-ghost btn-sm" onclick="deleteCode('${v.id}')">حذف</button>`;
+
+      return `
+        <div class="code-row">
+          <div class="top-line">
+            <span class="code-text">${v.id}</span>
+            ${badgeMap[st]}
+          </div>
+          <div class="meta">
+            <div>المدة: <b>${v.days} يوم</b></div>
+            <div>الجهاز: <b>${device}</b></div>
+            <div>المتبقي: <b>${remainTxt}</b></div>
+            <div>الطلبات: <b>${orders}</b></div>
+          </div>
+          <div class="actions">
+            <button class="btn-ghost btn-sm" onclick="copyCode('${v.id}')">نسخ الكود</button>
+            ${actionBtn}
+          </div>
+        </div>`;
+    }).join("");
+  };
+
+  window.copyCode = function (code) {
+    navigator.clipboard?.writeText(code).catch(() => {});
+  };
+
+  window.revokeCode = async function (code) {
+    if (!confirm(`إلغاء اشتراك الكود ${code} نهائياً؟`)) return;
+    await updateDoc(doc(db, "codes", code), { revoked: true });
+    loadCodes();
+  };
+
+  window.deleteCode = async function (code) {
+    if (!confirm(`حذف الكود ${code}؟`)) return;
+    await deleteDoc(doc(db, "codes", code));
+    loadCodes();
+  };
+</script>
+</body>
+</html>

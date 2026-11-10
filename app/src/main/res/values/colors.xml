@@ -1,0 +1,14 @@
+<resources>
+    <color name="primary">#6D28D9</color>
+    <color name="primary_dark">#1B0B3A</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="accent">#A855F7</color>
+    <color name="bg">#FFFFFF</color>
+    <color name="surface">#F6F1FE</color>
+    <color name="text">#1A1030</color>
+    <color name="muted">#6B6285</color>
+    <color name="stroke">#E0D4F7</color>
+    <color name="ok">#0E7C5A</color>
+    <color name="warn">#C0392B</color>
+    <color name="launcher_bg">#0A0414</color>
+</resources>
